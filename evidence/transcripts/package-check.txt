@@ -1,0 +1,18 @@
+$ python3 tests/test_package.py -v
+test_1_files (__main__.PackageTest.test_1_files)
+The package is SKILL.md and agents/openai.yaml. ... ok
+test_2_no_program (__main__.PackageTest.test_2_no_program)
+No package file is executable, has a #! line, or is not .md/.yaml. ... ok
+test_3_markers (__main__.PackageTest.test_3_markers)
+SKILL.md names the four labels and the three marker shapes. ... ok
+test_4_default_log (__main__.PackageTest.test_4_default_log)
+SKILL.md gives .address-comments/review-log.md as the default log. ... ok
+test_5_no_host_path (__main__.PackageTest.test_5_no_host_path)
+No package file contains /Users/, /home/, ~/ or $HOME. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests
+
+OK
+$ echo "exit status: $?"
+exit status: 0

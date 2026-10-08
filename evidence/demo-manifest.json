@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-08",
+  "skill": {
+    "path": "skills/address-comments/SKILL.md",
+    "sha256": "2887bd82c5ee7bbe375eaf9bab3f774c60e27c4581a2b77d049fc33d9caa9070"
+  },
+  "interface": {
+    "path": "skills/address-comments/agents/openai.yaml",
+    "sha256": "8c5965010b85e1de60f2d2d78d8e80e87926d5fcb1c60b39c74cae327c97ea8b"
+  },
+  "programs": [
+    {
+      "path": "tests/test_package.py",
+      "sha256": "0fcea9c8caa0a88f16363d16f6dc2cfd49ae386465924ac17555a990634253b5"
+    }
+  ],
+  "agent": {
+    "invoked_the_skill": false,
+    "note": "No agent session ran address-comments to produce this evidence, and no marker was addressed. The transcript records one run of the packaging test by scripts/record_session.py while this release was being prepared."
+  },
+  "invocation": {
+    "commands": [
+      "python3 tests/test_package.py -v"
+    ],
+    "interpreter": "Python 3.13.13",
+    "working_directory": "a throwaway directory holding a copy of skills/ and of tests/test_package.py"
+  },
+  "output": {
+    "path": "evidence/transcripts/package-check.txt",
+    "sha256": "f1520f6dc28224e7ddf03e9cfacd17106ee85addd27d80ef7df5bb12ffda2c13",
+    "edited": true,
+    "transforms": [
+      {
+        "name": "strip-test-duration",
+        "what": "The elapsed time that unittest prints after the test count was removed from the one line that reports it, so that line ends after the test count. scripts/record_session.py makes that edit. No other line of the test's output was changed."
+      }
+    ],
+    "note": "scripts/record_session.py wrote three lines itself: the first line, which is the command prefixed with \"$ \"; the line '$ echo \"exit status: $?\"'; and the last line, 'exit status: ' followed by the command's exit status. Every other line is the packaging test's combined standard output and standard error, with the one edit declared in transforms."
+  }
+}
