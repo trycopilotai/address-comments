@@ -1,6 +1,6 @@
 {
   "name": "address-comments",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Instructions for a coding agent to find AGENT:, TODO(agent) and TODO(code-review:<id>) markers, address them, remove them and log the work. One spec file and no runnable code.",
   "author": {
     "name": "trycopilot.ai"

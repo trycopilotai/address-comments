@@ -43,6 +43,10 @@ private channel.
   stamp. `scripts/generate_demo.py` writes two SVG files,
   or none with `--check`;
   `scripts/verify_demo.py` reads files and writes none.
+  `scripts/render_invocation.py`, which no `Makefile` target
+  runs, reads a raw client log and a prompt file named on
+  its command line and prints a transcript to standard
+  output; it writes no file.
   `scripts/record_session.py` copies `skills/` and
   `tests/test_package.py` into a temporary directory, writes
   a small `python3` launcher beside them, runs the test
@@ -53,8 +57,10 @@ private channel.
   `tests/test_package.py` reads the files under
   `skills/address-comments/`. `tests/test_integrations.py`
   runs `git` against the repository root, runs
-  `tests/test_package.py` once, and loads the two demo
-  scripts to compare the images with the transcript.
+  `tests/test_package.py` once, loads the two demo
+  scripts to compare the images with the transcript, and
+  loads `scripts/render_invocation.py` to render small
+  in-memory logs, without reading or writing a log file.
 
 ## What `SKILL.md` tells an agent to do
 

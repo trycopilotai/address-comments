@@ -39,8 +39,16 @@ and to every string value in each decoded log event (including
 strings nested in lists and objects) before anything is clipped.
 They are not applied to dictionary keys, so a path or host name
 that appears only as a key in the log is printed unchanged.
-Each replaces a whole path prefix (or a whole host name), never
-part of a longer name:
+Each path transform replaces a root only where it stands as a
+whole path prefix: the character before it is the start of the
+string, whitespace, a quote, a backtick, or one of `=([:,;|&<>`,
+and the character after it is the end of the string, `/`,
+whitespace, a quote, a backtick, a backslash, or one of
+`)]:,;|&<>`. A root is therefore not replaced inside a longer
+path (`/a/root` in `/b/a/root`) or a longer name (`/a/root` in
+`/a/root2` or `/a/root@old`). The host name is replaced only
+where no letter, digit, `_`, `.` or `-` sits on either side of
+it:
 
     replace-isolation-root each --isolation-root             -> /iso
     replace-scratch-root   /private/tmp/claude-<uid>/<slug>  -> /scratch
@@ -73,9 +81,12 @@ from pathlib import Path
 
 LIMIT = 400  # characters kept of each rendered argument value
 
-# A path prefix ends where a path-name character would continue it.
+# A root counts only as a whole path prefix: see the module docstring.
+_BEFORE = r"(?<![^\s\"'`=(\[:,;|&<>])"
+_AFTER = r"(?=[/\s\"'`\\)\]:,;|&<>]|\Z)"
+# A host name counts only where no name character continues it.
 _END = r"(?![A-Za-z0-9_.\-])"
-_SCRATCH = re.compile(r"(?:/private)?/tmp/claude-[0-9]+/[^/\s\"'`]+")
+_SCRATCH = re.compile(_BEFORE + r"(?:/private)?/tmp/claude-[0-9]+/[^/\s\"'`]+" + _AFTER)
 
 
 class Transforms:
@@ -99,7 +110,7 @@ class Transforms:
 
     @staticmethod
     def _prefix(path):
-        return re.compile(re.escape(path.rstrip("/")) + _END)
+        return re.compile(_BEFORE + re.escape(path.rstrip("/")) + _AFTER)
 
     def __call__(self, text):
         for pattern, replacement in self.steps:

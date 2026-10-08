@@ -58,8 +58,10 @@ executable, opens with a `#!` line, or has another suffix.
 to run.
 
 The repository around the package also holds Python scripts
-that record the transcript, build and check the images, and
-test the packaging. They are not part of the skill.
+that record the transcript, build and check the images,
+render the agent invocation transcripts from the clients'
+raw logs, and test the packaging. They are not part of the
+skill.
 
 ## What is in it
 
@@ -212,7 +214,7 @@ it fails.
 
 ```sh
 set -eu
-release=v0.1.1
+release=v0.1.2
 install_target="$HOME/.claude/skills/address-comments"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -252,7 +254,7 @@ the block above is `install_target`.
 
 ```sh
 set -eu
-release=v0.1.1
+release=v0.1.2
 install_target="$HOME/.agents/skills/address-comments"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"

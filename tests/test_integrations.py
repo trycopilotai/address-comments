@@ -416,6 +416,14 @@ class RendererTest(unittest.TestCase):
         self.assertEqual(t("on box.local and box"), "on host and host")
         self.assertEqual(t("boxes"), "boxes")
 
+    def test_a_root_inside_a_longer_path_or_name_is_kept(self) -> None:
+        t = self.transforms
+        self.assertEqual(t("/h/u/clone@old/x"), "~/clone@old/x")
+        self.assertEqual(t("/p/h/u/clone/x"), "/p/h/u/clone/x")
+        self.assertEqual(t("a/private/tmp/claude-0/s/t"), "a/private/tmp/claude-0/s/t")
+        self.assertEqual(t('cd "/h/u/fix" && rg x /h/u/fix:3'), 'cd "/work" && rg x /work:3')
+        self.assertEqual(t("--dir=/h/u/clone"), "--dir=/plugin")
+
     def test_isolation_root_is_replaced_first(self) -> None:
         t = self.module.Transforms(
             "/iso/fixture", ["/iso/plugin"], "/h/u", "box", ["/t/iso.1", "/private/t/iso.1"]
