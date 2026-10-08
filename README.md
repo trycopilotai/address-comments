@@ -34,17 +34,17 @@ the recorded output of
 
 **Not measured, stated up front.**
 
-- No agent ran address-comments to produce the evidence
-  here. No marker was found, addressed or removed, and no
-  review log was written.
-- Whether an agent that reads `SKILL.md` follows it has not
-  been measured.
 - What the `rg` search command in `SKILL.md` matches and
   misses is not evidenced here. For this release it was run
   in one throwaway check of how it treats the review log,
   described below.
-- Neither Claude Code nor Codex was started to confirm that
-  the invocation names below resolve.
+- Beyond one run per client on one synthetic fixture,
+  described under Agent invocations, whether an agent that
+  reads `SKILL.md` follows it has not been measured.
+- The install blocks below were not run for the agent
+  invocations. Claude Code loaded the repository as a plugin
+  directory and Codex loaded a project copy under
+  `.agents/skills/`.
 
 ## What the claim covers
 
@@ -212,7 +212,7 @@ it fails.
 
 ```sh
 set -eu
-release=v0.1.0
+release=v0.1.1
 install_target="$HOME/.claude/skills/address-comments"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -240,8 +240,10 @@ trap - EXIT
 rm -rf "$install_tmp"
 ```
 
-The name to invoke is `/address-comments`. As stated above,
-that was not confirmed in a running Claude Code.
+The name to invoke is `/address-comments`. Claude Code
+2.1.220 loaded the skill under that name from this
+repository passed as a plugin directory (see Agent
+invocations); this block was not run.
 
 ### Codex
 
@@ -250,7 +252,7 @@ the block above is `install_target`.
 
 ```sh
 set -eu
-release=v0.1.0
+release=v0.1.1
 install_target="$HOME/.agents/skills/address-comments"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -278,18 +280,21 @@ trap - EXIT
 rm -rf "$install_tmp"
 ```
 
-The name to invoke is `$address-comments`. That was not
-confirmed in a running Codex either.
+The name to invoke is `$address-comments`. Codex 0.146.0
+read the skill from a project copy under `.agents/skills/`
+when a prompt named it (see Agent invocations); this block
+was not run.
 
 Each block works in a temporary `.address-comments.*`
 directory beside the target and removes it on exit. An
 existing install at the target is replaced.
 
 While it clones, `git` prints
-`warning: refs/tags/v0.1.0 <object> is not a commit!` and a
-note that `HEAD` is detached, despite `--quiet`. Both are
-expected for a clone pinned to an annotated tag. That output
-was seen when both blocks were run against a local copy of
+`warning: refs/tags/<release> <object> is not a commit!`,
+with `<release>` the pinned tag, and a note that `HEAD` is
+detached, despite `--quiet`. Both are expected for a clone
+pinned to an annotated tag. That output was seen, for
+v0.1.0, when both blocks were run against a local copy of
 this repository with `file://` in place of the GitHub URL;
 neither block has been run against GitHub.
 
@@ -319,16 +324,59 @@ of that. `evidence/demo-manifest.json` is where the edit is
 declared, as `strip-test-duration`, beside the SHA-256 of
 `SKILL.md`, of `agents/openai.yaml` and of the test, the
 command, the interpreter, the date, and the SHA-256 of the
-transcript. The manifest also records that no agent invoked
-the skill.
+transcript. The manifest's entry for this transcript also
+records that no agent invoked the skill to produce it.
 
 This is evidence about the files in the package. It is not
 evidence that an agent following `SKILL.md` addresses
 markers correctly.
 
 `make check` runs the packaging test and a second suite that
-ties this file, both plugin manifests, the transcript and
+ties this file, both plugin manifests, the transcripts and
 the demo images to each other.
+
+### Agent invocations
+
+Each client ran the skill once on the same synthetic
+fixture: a small Python package with four agent-directed
+markers (two `AGENT:`, one `TODO(agent)`, one
+`TODO(code-review:CR-7)`), one plain `TODO:` that is not a
+marker, and tests that pass. This is one run per client on
+one fixture, not a benchmark.
+
+- [`evidence/transcripts/2026-10-08-claude-code-invocation.txt`](evidence/transcripts/2026-10-08-claude-code-invocation.txt):
+  Claude Code 2.1.220 loaded the skill, made the four
+  requested changes, removed the four markers, left the
+  plain `TODO:` in place, ran the tests, wrote the review
+  log to `.address-comments/review-log.md`, and committed
+  and pushed nothing.
+- [`evidence/transcripts/2026-10-08-codex-invocation.txt`](evidence/transcripts/2026-10-08-codex-invocation.txt):
+  Codex 0.146.0 read the skill, ran its `rg` pattern, made
+  the same four changes plus a regression test, removed the
+  four markers, left the plain `TODO:` in place, ran the
+  tests, wrote the review log to the same default path, and
+  committed and pushed nothing.
+
+Known limits. The published Claude Code run did not run the
+`rg` search `SKILL.md` tells the agent to run first; it
+listed and read every file instead. Its final message says
+it confirmed that `average([])` raised before fixing it, but
+the transcript shows `average([])` run only after the fix.
+Claude Code's first run wrote a scratch file under `/tmp`,
+outside the fixture the prompt confined it to, so it was
+re-run once in a fresh temporary directory; the manifest
+lists the first run as unpublished. Neither fixture had a
+formatter, a `CODE_REVIEW.gpt.md` checklist, a wrapper or a
+`<name> says:` label, so those paths were not exercised.
+
+`scripts/render_invocation.py` rendered each transcript from
+the client's raw log. It replaces paths and the host name in
+string values only, not in dictionary keys; clips each tool
+argument and each message between calls at 400 characters;
+leaves out tool output; and reproduces the prompt and the
+final message with trailing newlines trimmed. The manifest's
+`invocations` list records the client, model, prompt, path
+transforms and hashes.
 
 ## Contributing
 

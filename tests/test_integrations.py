@@ -33,6 +33,14 @@ PACKAGE_TEST = ROOT / "tests" / "test_package.py"
 README = ROOT / "README.md"
 TRANSCRIPT = ROOT / "evidence" / "transcripts" / "package-check.txt"
 MANIFEST = ROOT / "evidence" / "demo-manifest.json"
+RENDERER = ROOT / "scripts" / "render_invocation.py"
+INVOCATION_TRANSFORMS = [
+    "replace-scratch-root",
+    "replace-plugin-root",
+    "replace-capture-root",
+    "replace-home",
+    "replace-hostname",
+]
 CLAIM = "address-comments ships one spec file and no runnable code."
 COMMAND = "python3 tests/test_package.py -v"
 FILES_LINE = "The package is SKILL.md and agents/openai.yaml. ... ok"
@@ -255,8 +263,10 @@ class ReadmeTest(unittest.TestCase):
 
     def test_readme_says_what_was_not_measured(self) -> None:
         text = " ".join(read(README).split())
-        self.assertIn("No agent ran address-comments to produce the evidence", text)
+        self.assertNotIn("No agent ran address-comments to produce the evidence", text)
+        self.assertIn("Beyond one run per client on one synthetic fixture", text)
         self.assertIn("has not been measured", text)
+        self.assertIn("The install blocks below were not run for the agent invocations.", text)
         self.assertIn("misses is not evidenced here", text)
 
     def test_not_included_names_each_companion_and_its_repository(self) -> None:
@@ -332,6 +342,121 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(result_lines(fresh.stdout), recorded)
         count = [line for line in read(TRANSCRIPT).splitlines() if line.startswith("Ran ")]
         self.assertEqual(count, ["Ran %d tests" % len(recorded)])
+
+
+class InvocationTest(unittest.TestCase):
+    def records(self) -> list:
+        return json.loads(read(MANIFEST))["invocations"]
+
+    def published(self) -> list:
+        return [r for r in self.records() if r["published"]]
+
+    def test_one_published_invocation_per_client(self) -> None:
+        records = self.records()
+        self.assertEqual(
+            sorted(r["product"] for r in self.published()), ["Claude Code", "Codex"]
+        )
+        for record in records:
+            self.assertIs(record["invoked_the_skill"], True)
+            self.assertIn(record["published"], (True, False))
+            transforms = [t for t in record["transforms"] if t != "replace-isolation-root"]
+            self.assertEqual(transforms, INVOCATION_TRANSFORMS)
+            if "replace-isolation-root" in record["transforms"]:
+                self.assertEqual(record["transforms"][0], "replace-isolation-root")
+            self.assertRegex(record["raw_output_sha256"], r"^[0-9a-f]{64}$")
+            self.assertTrue(record["outcome"])
+        for record in records:
+            if not record["published"]:
+                self.assertNotIn("transcript", record)
+
+    def test_invocation_text_matches_the_client(self) -> None:
+        forms = {"Claude Code": "/" + NAME, "Codex": "$" + NAME}
+        for record in self.records():
+            self.assertEqual(record["invocation"], forms[record["product"]])
+            self.assertIn(record["invocation"], record["prompt"])
+
+    def test_transcript_hashes_match_the_manifest(self) -> None:
+        listed = set()
+        for record in self.published():
+            path = ROOT / record["transcript"]["path"]
+            self.assertEqual(record["transcript"]["sha256"], sha256(path))
+            listed.add(path.name)
+            text = read(path)
+            self.assertIn(record["prompt"], text)
+            self.assertIn("\n## final message\n", text)
+        on_disk = {p.name for p in TRANSCRIPT.parent.glob("*-invocation.txt")}
+        self.assertEqual(listed, on_disk)
+
+    def test_readme_links_each_transcript(self) -> None:
+        text = read(README)
+        for record in self.published():
+            self.assertIn("](" + record["transcript"]["path"] + ")", text)
+
+    def test_transcripts_name_only_the_replaced_roots(self) -> None:
+        absolute = re.compile(r"(?<![\w.~/])/(?:private|tmp|var|home|Users)/")
+        for path in TRANSCRIPT.parent.glob("*-invocation.txt"):
+            self.assertEqual(absolute.findall(read(path)), [], path.name)
+
+
+class RendererTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = load(RENDERER, "render_invocation")
+        self.transforms = self.module.Transforms(
+            "/h/u/fix", ["/h/u/fix/.agents/skills/" + NAME, "/h/u/clone"], "/h/u", "box.local"
+        )
+
+    def test_transforms_replace_whole_prefixes_in_order(self) -> None:
+        t = self.transforms
+        self.assertEqual(t("/h/u/fix/.agents/skills/%s/SKILL.md" % NAME), "/plugin/SKILL.md")
+        self.assertEqual(t("/h/u/clone/skills/x"), "/plugin/skills/x")
+        self.assertEqual(t("cd /h/u/fix && ls"), "cd /work && ls")
+        self.assertEqual(t("/h/u/fixture/a"), "~/fixture/a")
+        self.assertEqual(t("/h/u2/a"), "/h/u2/a")
+        self.assertEqual(t("/private/tmp/claude-0/-h-u-fix/t/out"), "/scratch/t/out")
+        self.assertEqual(t("on box.local and box"), "on host and host")
+        self.assertEqual(t("boxes"), "boxes")
+
+    def test_isolation_root_is_replaced_first(self) -> None:
+        t = self.module.Transforms(
+            "/iso/fixture", ["/iso/plugin"], "/h/u", "box", ["/t/iso.1", "/private/t/iso.1"]
+        )
+        self.assertEqual(t("/private/t/iso.1/fixture/a.py"), "/work/a.py")
+        self.assertEqual(t("/t/iso.1/plugin/SKILL.md"), "/plugin/SKILL.md")
+        self.assertEqual(t("/t/iso.1/other"), "/iso/other")
+        self.assertEqual(t("/t/iso.12/x"), "/t/iso.12/x")
+
+    def test_claude_code_log(self) -> None:
+        events = [
+            {"type": "system", "subtype": "init", "claude_code_version": "9.9.9", "model": "m"},
+            {"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": "a", "name": "Bash",
+                 "input": {"command": "cat /h/u/fix/" + "x" * 500}}]}},
+            {"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": "a", "is_error": True,
+                 "content": "Exit code 1\nboom"}]}},
+            {"type": "result", "subtype": "success", "num_turns": 2,
+             "duration_ms": 5, "total_cost_usd": 0.5, "result": "done\nok"},
+        ]
+        raw = "\n".join(json.dumps(e) for e in events)
+        text = self.module.render("claude-code", "Use /" + NAME, raw, self.transforms)
+        self.assertIn("model: m\n", text)
+        self.assertIn("    command: cat /work/" + "x" * 390 + " ...[", text)
+        self.assertIn("  < error (exit 1)\n", text)
+        self.assertTrue(text.endswith("## final message\n\ndone\nok\n"))
+
+    def test_codex_log(self) -> None:
+        events = [
+            {"type": "thread.started", "thread_id": "t"},
+            {"type": "item.completed", "item": {"type": "command_execution",
+             "command": "rg -n /h/u/fix/a.py", "exit_code": 1}},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "done"}},
+            {"type": "turn.completed", "usage": {"output_tokens": 3}},
+        ]
+        raw = "\n".join(json.dumps(e) for e in events)
+        text = self.module.render("codex", "Use $" + NAME, raw, self.transforms)
+        self.assertIn("    command: rg -n /work/a.py\n  < exit 1\n", text)
+        self.assertIn("usage output_tokens: 3\n", text)
+        self.assertTrue(text.endswith("## final message\n\ndone\n"))
 
 
 class DemoTest(unittest.TestCase):

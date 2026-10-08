@@ -37,5 +37,86 @@
       }
     ],
     "note": "scripts/record_session.py wrote three lines itself: the first line, which is the command prefixed with \"$ \"; the line '$ echo \"exit status: $?\"'; and the last line, 'exit status: ' followed by the command's exit status. Every other line is the packaging test's combined standard output and standard error, with the one edit declared in transforms."
-  }
+  },
+  "invocations": [
+    {
+      "product": "Claude Code",
+      "version": "2.1.220",
+      "model": "claude-sonnet-5",
+      "invocation": "/address-comments",
+      "prompt": "Use the /address-comments skill to address the review markers left for an agent in this git repository: a small Python package, tally/, its unit tests in tests/, and README.md. Stay inside this directory: do not read, write or run anything outside it, except the skill's own files. Work autonomously; there is no operator available to answer questions during this run.",
+      "loaded_from": "a depth-1 clone of this repository at v0.1.0 passed as --plugin-dir, in a fresh temporary directory beside the fixture (isolated re-run)",
+      "fixture": "A synthetic git repository: a small Python package (tally/), its unit tests and a README, with four agent-directed markers (an AGENT: comment asking to rename a helper, a TODO(agent) asking for a docstring, a TODO(code-review:CR-7) finding that average() raises on an empty list, and an AGENT: HTML comment in README.md asking for a Usage section), one plain TODO: that is not a marker, and a local bare remote.",
+      "date": "2026-10-08",
+      "transcript": {
+        "path": "evidence/transcripts/2026-10-08-claude-code-invocation.txt",
+        "sha256": "2694661670bef6de25775107f6af914aaf766af04735a2dd31515597e6ff79b2"
+      },
+      "raw_output_sha256": "d6fc2fc48e4d31ec97bc001370792130066753bbc73af34af1e404c6efd85164",
+      "raw_output_format": "claude --print --verbose --output-format stream-json",
+      "transforms": [
+        "replace-isolation-root",
+        "replace-scratch-root",
+        "replace-plugin-root",
+        "replace-capture-root",
+        "replace-home",
+        "replace-hostname"
+      ],
+      "invoked_the_skill": true,
+      "published": true,
+      "outcome": "Loaded the skill with a Skill tool call, read every file instead of running the skill's rg search, addressed all four markers (renamed _fmt to format_line, added the read_numbers docstring, made average([]) return 0.0, added a Usage section), removed them, left the plain TODO: in place, ran the tests, wrote .address-comments/review-log.md, and committed and pushed nothing.",
+      "inaccuracies": [
+        "The final message says the agent verified that average([]) raised ZeroDivisionError before fixing it; the transcript shows average([]) run only after the fix, when it returned 0.0."
+      ]
+    },
+    {
+      "product": "Codex",
+      "version": "0.146.0",
+      "model": "gpt-5.6-sol",
+      "model_source": "the client's session log for the same thread; the --json stream does not name the model",
+      "invocation": "$address-comments",
+      "prompt": "Use the $address-comments skill to address the review markers left for an agent in this git repository: a small Python package, tally/, its unit tests in tests/, and README.md. Stay inside this directory: do not read, write or run anything outside it, except the skill's own files. Work autonomously; there is no operator available to answer questions during this run.",
+      "loaded_from": "a copy of skills/address-comments/ at v0.1.0 committed in the fixture as .agents/skills/address-comments/",
+      "fixture": "A synthetic git repository: a small Python package (tally/), its unit tests and a README, with four agent-directed markers (an AGENT: comment asking to rename a helper, a TODO(agent) asking for a docstring, a TODO(code-review:CR-7) finding that average() raises on an empty list, and an AGENT: HTML comment in README.md asking for a Usage section), one plain TODO: that is not a marker, and a local bare remote.",
+      "date": "2026-10-08",
+      "transcript": {
+        "path": "evidence/transcripts/2026-10-08-codex-invocation.txt",
+        "sha256": "b4831fd782eb16037c8c02f1036e433c389ceb46222e8219b22239c9e92a55da"
+      },
+      "raw_output_sha256": "4353cba4c928549af0cfaa275161b628d640ccb8ab1fd9356f2bacdbef457730",
+      "raw_output_format": "codex exec --json",
+      "transforms": [
+        "replace-scratch-root",
+        "replace-plugin-root",
+        "replace-capture-root",
+        "replace-home",
+        "replace-hostname"
+      ],
+      "invoked_the_skill": true,
+      "published": true,
+      "outcome": "Read .agents/skills/address-comments/SKILL.md, ran the skill's rg pattern (with a .git exclude and an explicit path added), which matched the four markers and not the plain TODO:, addressed and removed all four (the same four changes, plus a regression test for average([])), ran the tests, wrote .address-comments/review-log.md, and committed and pushed nothing."
+    },
+    {
+      "product": "Claude Code",
+      "version": "2.1.220",
+      "model": "claude-sonnet-5",
+      "invocation": "/address-comments",
+      "prompt": "Use the /address-comments skill to address the review markers left for an agent in this git repository: a small Python package, tally/, its unit tests in tests/, and README.md. Stay inside this directory: do not read, write or run anything outside it, except the skill's own files. Work autonomously; there is no operator available to answer questions during this run.",
+      "loaded_from": "this repository's working copy at v0.1.0 passed as --plugin-dir, beside other checkouts",
+      "fixture": "A synthetic git repository: a small Python package (tally/), its unit tests and a README, with four agent-directed markers (an AGENT: comment asking to rename a helper, a TODO(agent) asking for a docstring, a TODO(code-review:CR-7) finding that average() raises on an empty list, and an AGENT: HTML comment in README.md asking for a Usage section), one plain TODO: that is not a marker, and a local bare remote.",
+      "date": "2026-10-08",
+      "raw_output_sha256": "1f27bc96322ec2b5ff7fce6981cc1aee9f534caa08d8bc02f4d7dcedc0ee1899",
+      "raw_output_format": "claude --print --verbose --output-format stream-json",
+      "transforms": [
+        "replace-scratch-root",
+        "replace-plugin-root",
+        "replace-capture-root",
+        "replace-home",
+        "replace-hostname"
+      ],
+      "invoked_the_skill": true,
+      "published": false,
+      "outcome": "Not published: loaded the skill and addressed all four markers, but wrote and removed a scratch input file under /tmp, outside the fixture, to smoke-test the command line; Claude Code was re-run once in isolation."
+    }
+  ]
 }
