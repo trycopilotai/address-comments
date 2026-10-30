@@ -4,13 +4,18 @@ A skill that tells a coding agent to find review markers
 left for it in source and docs (`AGENT:`, `TODO(agent)`,
 `TODO(code-review:<id>)` and a few related shapes), make the
 change each one asks for, remove the markers it addressed,
-and append an entry to a review log. Its package is one
-instruction file plus a Codex interface file, and holds no
-program.
+and append an entry to a review log.
+
+---
 
 [![auto-lint-pr](https://github.com/trycopilotai/address-comments/actions/workflows/auto-lint-pr.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/auto-lint-pr.yml)
 [![check](https://github.com/trycopilotai/address-comments/actions/workflows/check.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/check.yml)
 [![lint](https://github.com/trycopilotai/address-comments/actions/workflows/lint.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/lint.yml)
+
+---
+
+Its package is one instruction file plus a Codex interface
+file, and holds no program.
 
 address-comments ships one spec file and no runnable code.
 
