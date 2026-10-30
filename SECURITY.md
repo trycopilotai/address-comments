@@ -5,9 +5,9 @@
 Report privately through GitHub:
 <https://github.com/trycopilotai/address-comments/security/advisories/new>
 
-That opens a draft security advisory that is not public:
-the reporter and the repository's maintainers can see it. Do not put the details of a vulnerability in a
-public issue.
+That opens a draft security advisory that is not public: the
+reporter and the repository's maintainers can see it. Do not
+put the details of a vulnerability in a public issue.
 
 If that link shows "Not Found", private reporting is not
 turned on for this repository. Open a public issue titled
@@ -36,31 +36,31 @@ private channel.
   `Makefile` targets run the scripts below. The CI workflow
   in `.github/workflows/check.yml` checks out the
   repository, sets up Python and runs `make check`, with
-  both actions pinned to commit SHAs.
-  `assets/build.py` finds a Chrome or Chromium binary from a
-  fixed candidate list, runs it headless with a temporary
-  profile directory, and writes the preview PNG and its
-  stamp. `scripts/generate_demo.py` writes two SVG files,
-  or none with `--check`;
-  `scripts/verify_demo.py` reads files and writes none.
-  `scripts/render_invocation.py`, which no `Makefile` target
-  runs, reads a raw client log and a prompt file named on
-  its command line and prints a transcript to standard
-  output; it writes no file.
+  both actions pinned to commit SHAs. `assets/build.py`
+  finds a Chrome or Chromium binary from a fixed candidate
+  list, runs it headless with a temporary profile directory,
+  and writes the preview PNG and its stamp.
+  `scripts/generate_demo.py` writes two SVG files, or none
+  with `--check`; `scripts/verify_demo.py` reads files and
+  writes none. `scripts/render_invocation.py`, which no
+  `Makefile` target runs, reads a raw client log and a
+  prompt file named on its command line and prints a
+  transcript to standard output; it writes no file.
   `scripts/record_session.py` copies `skills/` and
   `tests/test_package.py` into a temporary directory, writes
   a small `python3` launcher beside them, runs the test
   there through `sh`, and, when the test passes and its
   output has the test-duration line, rewrites the transcript
-  and the manifest. Otherwise it rewrites neither. With `RECORD_RAW_DIR` set it also writes the
-  unedited capture into that directory.
-  `tests/test_package.py` reads the files under
-  `skills/address-comments/`. `tests/test_integrations.py`
-  runs `git` against the repository root, runs
-  `tests/test_package.py` once, loads the two demo
-  scripts to compare the images with the transcript, and
-  loads `scripts/render_invocation.py` to render small
-  in-memory logs, without reading or writing a log file.
+  and the manifest. Otherwise it rewrites neither. With
+  `RECORD_RAW_DIR` set it also writes the unedited capture
+  into that directory. `tests/test_package.py` reads the
+  files under `skills/address-comments/`.
+  `tests/test_integrations.py` runs `git` against the
+  repository root, runs `tests/test_package.py` once, loads
+  the two demo scripts to compare the images with the
+  transcript, and loads `scripts/render_invocation.py` to
+  render small in-memory logs, without reading or writing a
+  log file.
 
 ## What `SKILL.md` tells an agent to do
 
@@ -81,11 +81,11 @@ whether to use it. They are known limits, not findings:
   unrelated prose. `SKILL.md` gives no other check on where
   a marker came from, and this one is the agent's judgment.
 - It tells the agent to make the changes the markers ask
-  for, remove addressed markers, run the repository's formatter
-  or linter over the files it touched, and append to a
-  review log. The log goes where the operator says, or to
-  `.address-comments/review-log.md` in the repository being
-  edited.
+  for, remove addressed markers, run the repository's
+  formatter or linter over the files it touched, and append
+  to a review log. The log goes where the operator says, or
+  to `.address-comments/review-log.md` in the repository
+  being edited.
 - It tells the agent not to change unrelated code and not to
   stage, commit or push unless the user asks.
 - It calls the review log private and tells the agent not to
@@ -105,6 +105,6 @@ or linter, and optionally on a per-repository wrapper and on
 `multi-persona-code-review` as a writer of
 `TODO(code-review:<id>)` markers. `review-watch` is a skill
 that calls this one; `SKILL.md` does not depend on it. None
-of these ship here. Their behaviour, and the
-behaviour of Claude Code, Codex, or any other host, is out
-of scope here. Report those to their own maintainers.
+of these ship here. Their behaviour, and the behaviour of
+Claude Code, Codex, or any other host, is out of scope here.
+Report those to their own maintainers.

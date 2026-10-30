@@ -10,9 +10,9 @@ program.
 
 address-comments ships one spec file and no runnable code.
 
-The claim is about the installed package. The Python
-scripts elsewhere in this repository record, render and test
-it, and neither install block copies them.
+The claim is about the installed package. The Python scripts
+elsewhere in this repository record, render and test it, and
+neither install block copies them.
 
 <picture>
   <source
@@ -104,14 +104,14 @@ if the log should stay out of version control.
 The `rg` command in `SKILL.md`, run as written from the
 repository root with standard input closed, skipped a log at
 the default path in a check with ripgrep 15.2.0 in a
-throwaway Git repository,
-whether or not `.address-comments/` was in its ignore rules.
-Other invocations matched marker text quoted in that log in
-the same check: adding `--hidden`, adding `-uu`, naming the
-log file or its directory as the path to search, and moving
-the log to a directory whose name does not start with a dot.
-That check is not part of this repository's evidence. In
-the same check, when standard input was an open pipe, the
+throwaway Git repository, whether or not
+`.address-comments/` was in its ignore rules. Other
+invocations matched marker text quoted in that log in the
+same check: adding `--hidden`, adding `-uu`, naming the log
+file or its directory as the path to search, and moving the
+log to a directory whose name does not start with a dot.
+That check is not part of this repository's evidence. In the
+same check, when standard input was an open pipe, the
 command as written waited on standard input instead of
 searching the repository, and had not returned after two
 minutes, when it was stopped.
@@ -190,11 +190,10 @@ release:
   instead of naming "the concrete" one.
 
 Everything else in `SKILL.md`, including the marker shapes,
-the `rg` command and the `CODE_REVIEW.gpt.md` checklist name,
-is as it was.
-`CODE_REVIEW.gpt.md` is the name of a checklist file
-`SKILL.md` looks for in the repository being edited; it is
-not a file in this repository.
+the `rg` command and the `CODE_REVIEW.gpt.md` checklist
+name, is as it was. `CODE_REVIEW.gpt.md` is the name of a
+checklist file `SKILL.md` looks for in the repository being
+edited; it is not a file in this repository.
 
 ## Use it
 
@@ -306,11 +305,10 @@ Both blocks copy through `skill/`, a symlink to
 checkout that keeps symlinks. With `core.symlinks` set to
 false, `cp` failed and the block left an existing install in
 place, when the Claude Code block was run against a local
-copy of this repository. The repository also
-carries `.claude-plugin/plugin.json` and
-`.codex-plugin/plugin.json` for a marketplace. No
-marketplace lists this skill, so no marketplace install is
-described here.
+copy of this repository. The repository also carries
+`.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`
+for a marketplace. No marketplace lists this skill, so no
+marketplace install is described here.
 
 ## Evidence
 
@@ -320,14 +318,15 @@ one run of `python3 tests/test_package.py -v` in a throwaway
 directory that held a copy of `skills/` and of the test.
 `scripts/record_session.py` wrote three of its lines: the
 two lines that start with `$` and the final `exit status:`
-line. The rest is the test's output, with one edit: the elapsed time that unittest prints after the test
-count was removed. The transcript itself carries no notice
-of that. `evidence/demo-manifest.json` is where the edit is
-declared, as `strip-test-duration`, beside the SHA-256 of
-`SKILL.md`, of `agents/openai.yaml` and of the test, the
-command, the interpreter, the date, and the SHA-256 of the
-transcript. The manifest's entry for this transcript also
-records that no agent invoked the skill to produce it.
+line. The rest is the test's output, with one edit: the
+elapsed time that unittest prints after the test count was
+removed. The transcript itself carries no notice of that.
+`evidence/demo-manifest.json` is where the edit is declared,
+as `strip-test-duration`, beside the SHA-256 of `SKILL.md`,
+of `agents/openai.yaml` and of the test, the command, the
+interpreter, the date, and the SHA-256 of the transcript.
+The manifest's entry for this transcript also records that
+no agent invoked the skill to produce it.
 
 This is evidence about the files in the package. It is not
 evidence that an agent following `SKILL.md` addresses
