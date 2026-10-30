@@ -54,13 +54,13 @@ writes the transcript with the test duration removed, and
 rewrites the manifest's hashes, date and interpreter. If the
 test does not pass, or its output has no duration line, it
 rewrites neither the transcript nor the manifest and exits
-1. It needs `sh` and `python3`.
-Record with Python 3.11 or newer: older versions print each
-test's name in a different form, and the committed
-transcript uses the newer one. `make demo` rebuilds the two
-images from the transcript. `make assets` rebuilds the
-social preview and needs Chrome or Chromium;
-`make asset-check` does not.
+
+1. It needs `sh` and `python3`. Record with Python 3.11 or
+   newer: older versions print each test's name in a
+   different form, and the committed transcript uses the
+   newer one. `make demo` rebuilds the two images from the
+   transcript. `make assets` rebuilds the social preview and
+   needs Chrome or Chromium; `make asset-check` does not.
 
 ## What is most useful
 

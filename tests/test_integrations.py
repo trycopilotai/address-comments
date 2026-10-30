@@ -231,7 +231,9 @@ class ReadmeTest(unittest.TestCase):
         self.assertEqual(lines[0], "$ " + COMMAND)
         self.assertIn(FILES_LINE, lines)
         self.assertIn(NO_PROGRAM_LINE, lines)
-        self.assertEqual(lines[-3:], ["OK", '$ echo "exit status: $?"', "exit status: 0"])
+        self.assertEqual(
+            lines[-3:], ["OK", '$ echo "exit status: $?"', "exit status: 0"]
+        )
 
     def test_each_install_block_pins_the_manifest_version(self) -> None:
         version = manifest(".claude-plugin")["version"]
@@ -266,7 +268,9 @@ class ReadmeTest(unittest.TestCase):
         self.assertNotIn("No agent ran address-comments to produce the evidence", text)
         self.assertIn("Beyond one run per client on one synthetic fixture", text)
         self.assertIn("has not been measured", text)
-        self.assertIn("The install blocks below were not run for the agent invocations.", text)
+        self.assertIn(
+            "The install blocks below were not run for the agent invocations.", text
+        )
         self.assertIn("misses is not evidenced here", text)
 
     def test_not_included_names_each_companion_and_its_repository(self) -> None:
@@ -275,7 +279,9 @@ class ReadmeTest(unittest.TestCase):
             text[text.index("## Not included") : text.index("## What changed")].split()
         )
         for companion in COMPANIONS:
-            self.assertIn("`%s`, published as `trycopilotai/%s`" % (companion, companion), section)
+            self.assertIn(
+                "`%s`, published as `trycopilotai/%s`" % (companion, companion), section
+            )
         self.assertFalse((ROOT / "skills" / COMPANIONS[0]).exists())
         self.assertFalse((ROOT / "skills" / COMPANIONS[1]).exists())
 
@@ -340,7 +346,9 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(fresh.returncode, 0, fresh.stdout)
         recorded = result_lines(read(TRANSCRIPT))
         self.assertEqual(result_lines(fresh.stdout), recorded)
-        count = [line for line in read(TRANSCRIPT).splitlines() if line.startswith("Ran ")]
+        count = [
+            line for line in read(TRANSCRIPT).splitlines() if line.startswith("Ran ")
+        ]
         self.assertEqual(count, ["Ran %d tests" % len(recorded)])
 
 
@@ -359,7 +367,9 @@ class InvocationTest(unittest.TestCase):
         for record in records:
             self.assertIs(record["invoked_the_skill"], True)
             self.assertIn(record["published"], (True, False))
-            transforms = [t for t in record["transforms"] if t != "replace-isolation-root"]
+            transforms = [
+                t for t in record["transforms"] if t != "replace-isolation-root"
+            ]
             self.assertEqual(transforms, INVOCATION_TRANSFORMS)
             if "replace-isolation-root" in record["transforms"]:
                 self.assertEqual(record["transforms"][0], "replace-isolation-root")
@@ -402,12 +412,17 @@ class RendererTest(unittest.TestCase):
     def setUp(self) -> None:
         self.module = load(RENDERER, "render_invocation")
         self.transforms = self.module.Transforms(
-            "/h/u/fix", ["/h/u/fix/.agents/skills/" + NAME, "/h/u/clone"], "/h/u", "box.local"
+            "/h/u/fix",
+            ["/h/u/fix/.agents/skills/" + NAME, "/h/u/clone"],
+            "/h/u",
+            "box.local",
         )
 
     def test_transforms_replace_whole_prefixes_in_order(self) -> None:
         t = self.transforms
-        self.assertEqual(t("/h/u/fix/.agents/skills/%s/SKILL.md" % NAME), "/plugin/SKILL.md")
+        self.assertEqual(
+            t("/h/u/fix/.agents/skills/%s/SKILL.md" % NAME), "/plugin/SKILL.md"
+        )
         self.assertEqual(t("/h/u/clone/skills/x"), "/plugin/skills/x")
         self.assertEqual(t("cd /h/u/fix && ls"), "cd /work && ls")
         self.assertEqual(t("/h/u/fixture/a"), "~/fixture/a")
@@ -421,12 +436,18 @@ class RendererTest(unittest.TestCase):
         self.assertEqual(t("/h/u/clone@old/x"), "~/clone@old/x")
         self.assertEqual(t("/p/h/u/clone/x"), "/p/h/u/clone/x")
         self.assertEqual(t("a/private/tmp/claude-0/s/t"), "a/private/tmp/claude-0/s/t")
-        self.assertEqual(t('cd "/h/u/fix" && rg x /h/u/fix:3'), 'cd "/work" && rg x /work:3')
+        self.assertEqual(
+            t('cd "/h/u/fix" && rg x /h/u/fix:3'), 'cd "/work" && rg x /work:3'
+        )
         self.assertEqual(t("--dir=/h/u/clone"), "--dir=/plugin")
 
     def test_isolation_root_is_replaced_first(self) -> None:
         t = self.module.Transforms(
-            "/iso/fixture", ["/iso/plugin"], "/h/u", "box", ["/t/iso.1", "/private/t/iso.1"]
+            "/iso/fixture",
+            ["/iso/plugin"],
+            "/h/u",
+            "box",
+            ["/t/iso.1", "/private/t/iso.1"],
         )
         self.assertEqual(t("/private/t/iso.1/fixture/a.py"), "/work/a.py")
         self.assertEqual(t("/t/iso.1/plugin/SKILL.md"), "/plugin/SKILL.md")
@@ -435,15 +456,46 @@ class RendererTest(unittest.TestCase):
 
     def test_claude_code_log(self) -> None:
         events = [
-            {"type": "system", "subtype": "init", "claude_code_version": "9.9.9", "model": "m"},
-            {"type": "assistant", "message": {"content": [
-                {"type": "tool_use", "id": "a", "name": "Bash",
-                 "input": {"command": "cat /h/u/fix/" + "x" * 500}}]}},
-            {"type": "user", "message": {"content": [
-                {"type": "tool_result", "tool_use_id": "a", "is_error": True,
-                 "content": "Exit code 1\nboom"}]}},
-            {"type": "result", "subtype": "success", "num_turns": 2,
-             "duration_ms": 5, "total_cost_usd": 0.5, "result": "done\nok"},
+            {
+                "type": "system",
+                "subtype": "init",
+                "claude_code_version": "9.9.9",
+                "model": "m",
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "a",
+                            "name": "Bash",
+                            "input": {"command": "cat /h/u/fix/" + "x" * 500},
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "a",
+                            "is_error": True,
+                            "content": "Exit code 1\nboom",
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "success",
+                "num_turns": 2,
+                "duration_ms": 5,
+                "total_cost_usd": 0.5,
+                "result": "done\nok",
+            },
         ]
         raw = "\n".join(json.dumps(e) for e in events)
         text = self.module.render("claude-code", "Use /" + NAME, raw, self.transforms)
@@ -455,9 +507,18 @@ class RendererTest(unittest.TestCase):
     def test_codex_log(self) -> None:
         events = [
             {"type": "thread.started", "thread_id": "t"},
-            {"type": "item.completed", "item": {"type": "command_execution",
-             "command": "rg -n /h/u/fix/a.py", "exit_code": 1}},
-            {"type": "item.completed", "item": {"type": "agent_message", "text": "done"}},
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": "rg -n /h/u/fix/a.py",
+                    "exit_code": 1,
+                },
+            },
+            {
+                "type": "item.completed",
+                "item": {"type": "agent_message", "text": "done"},
+            },
             {"type": "turn.completed", "usage": {"output_tokens": 3}},
         ]
         raw = "\n".join(json.dumps(e) for e in events)

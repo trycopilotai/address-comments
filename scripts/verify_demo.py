@@ -40,7 +40,7 @@ MINIMUM_CONTRAST = 4.5
 
 TEXT_ELEMENT = re.compile(
     r'<text x="(?P<x>\d+)" y="(?P<y>\d+)" fill="(?P<fill>#[0-9a-f]{6})"'
-    r'(?P<rest>[^>]*)>(?P<body>[^<]*)</text>'
+    r"(?P<rest>[^>]*)>(?P<body>[^<]*)</text>"
 )
 KEYFRAMES = re.compile(
     r"@keyframes reveal-(?P<step>\d+) \{\s*"
@@ -102,7 +102,9 @@ def problems_in(generator, transcript: str) -> list[str]:
         for match in session:
             line = html.unescape(match.group("body"))
             if line not in transcript_lines:
-                problems.append("%s shows a line the transcript lacks: %r" % (name, line))
+                problems.append(
+                    "%s shows a line the transcript lacks: %r" % (name, line)
+                )
             width = int(match.group("x")) + len(line) * generator.GLYPH_WIDTH
             if width > generator.WIDTH - generator.MARGIN_X:
                 problems.append("%s: a line overruns the canvas: %r" % (name, line))
@@ -137,7 +139,9 @@ def problems_in(generator, transcript: str) -> list[str]:
         if any(s <= h for s, h in zip(shown, hidden)):
             problems.append("a step is shown before it stops being hidden")
         if len(holds) != 1 or max(holds) <= max(shown):
-            problems.append("steps do not all hold to one shared point after the last reveal")
+            problems.append(
+                "steps do not all hold to one shared point after the last reveal"
+            )
     for step, rule in rules.items():
         if int(rule.group("name")) != step:
             problems.append("step %d uses another step's keyframes" % step)
