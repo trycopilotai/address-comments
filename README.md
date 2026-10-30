@@ -8,6 +8,10 @@ and append an entry to a review log. Its package is one
 instruction file plus a Codex interface file, and holds no
 program.
 
+[![auto-lint-pr](https://github.com/trycopilotai/address-comments/actions/workflows/auto-lint-pr.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/auto-lint-pr.yml)
+[![check](https://github.com/trycopilotai/address-comments/actions/workflows/check.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/check.yml)
+[![lint](https://github.com/trycopilotai/address-comments/actions/workflows/lint.yml/badge.svg)](https://github.com/trycopilotai/address-comments/actions/workflows/lint.yml)
+
 address-comments ships one spec file and no runnable code.
 
 The claim is about the installed package. The Python scripts
